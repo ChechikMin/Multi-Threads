@@ -8,7 +8,7 @@ int main()
 {
 	try
 	{
-		Client client;
+		TcpClient client;
 		client.exec();
 	}
 	catch (const std::exception& e)

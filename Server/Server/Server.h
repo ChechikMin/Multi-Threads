@@ -1,20 +1,19 @@
 #pragma once
-#include"../../Client/Client/ISocketProvader.h"
+#include"../../Client/Client/ISocketProvider.h"
 using namespace std;
-class Server
+class TcpServer
 {
 private:
 	bool winsockStarted;
-	SOCKET sock;
+	shared_ptr< SOCKET > sock;
 public:
-	Server();
-	~Server();
+	TcpServer();
+	virtual ~TcpServer();
 	bool Start(const char *port);
-	void Stop();
 };
 
-Server::Server()
-	: sock(INVALID_SOCKET), winsockStarted(false)
+TcpServer::TcpServer()
+	: sock(), winsockStarted(false)
 {
 	WSADATA WSAData = { 0 };
 	int status = WSAStartup(MAKEWORD(2, 0), &WSAData);
@@ -24,15 +23,14 @@ Server::Server()
 		winsockStarted = true;
 }
 
-Server::~Server()
+TcpServer::~TcpServer()
 {
-	Stop();
 
 	if (winsockStarted)
 		WSACleanup();
 }
 
-bool Server::Start(const char *port)
+bool TcpServer::Start(const char *port)
 {
 	WSADATA WSAData; //Данные 
 	SOCKET *server, *client; //Сокеты сервера и клиента
@@ -62,13 +60,4 @@ bool Server::Start(const char *port)
 		return true;
 	}
 	return false;
-}
-
-void Server::Stop()
-{
-	if (sock != INVALID_SOCKET)
-	{
-		closesocket(sock);
-		sock = INVALID_SOCKET;
-	}
 }

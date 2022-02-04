@@ -6,7 +6,7 @@
 
 int main()
 {
-	Server server;
+	TcpServer server;
 	server.Start("8000");
 
     std::cout << "Hello World!\n";

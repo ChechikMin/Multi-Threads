@@ -1,9 +1,9 @@
 #pragma once
-#include "ISocketProvader.h"
+#include "ISocketProvider.h"
 
-class Client {
+class TcpClient {
 public:
-	Client();
+	TcpClient();
 	void exec() {
 		
 		WSADATA WSAData;
@@ -35,7 +35,7 @@ private:
 
 };
 
-Client::Client() {
+TcpClient::TcpClient() {
 
 	m_socket = ISocketProvider::getSocketProvider();
 
