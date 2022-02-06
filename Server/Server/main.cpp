@@ -7,7 +7,8 @@
 int main()
 {
 	TcpServer server;
-	server.Start("8000");
+	if (server.start("8000"))
+		server.process();
 
     std::cout << "Hello World!\n";
 }

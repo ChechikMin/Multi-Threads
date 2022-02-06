@@ -1,19 +1,25 @@
 #pragma once
 #include"../../Client/Client/ISocketProvider.h"
+#include <vector>
+#define BUFF_SIZE 64
 using namespace std;
 class TcpServer
 {
 private:
 	bool winsockStarted;
-	shared_ptr< SOCKET > sock;
+	SOCKET client;
+	WSADATA WSAData; //Данные 
+	SOCKET* server; //Сокеты сервера и клиента
+	SOCKADDR_IN serverAddr, clientAddr;
 public:
 	TcpServer();
 	virtual ~TcpServer();
-	bool Start(const char *port);
+	bool start(const char *port);
+	void process();
 };
 
 TcpServer::TcpServer()
-	: sock(), winsockStarted(false)
+	: server(),client(), winsockStarted(false)
 {
 	WSADATA WSAData = { 0 };
 	int status = WSAStartup(MAKEWORD(2, 0), &WSAData);
@@ -28,13 +34,12 @@ TcpServer::~TcpServer()
 
 	if (winsockStarted)
 		WSACleanup();
+	delete server;
 }
 
-bool TcpServer::Start(const char *port)
+bool TcpServer::start(const char *port)
 {
-	WSADATA WSAData; //Данные 
-	SOCKET *server, *client; //Сокеты сервера и клиента
-	SOCKADDR_IN serverAddr, clientAddr; //Адреса сокетов
+	 //Адреса сокетов
 	WSAStartup(MAKEWORD(2, 0), &WSAData);
 	server = ISocketProvider::getSocketProvider(); //Создали сервер
 	if (*server == INVALID_SOCKET) {
@@ -49,15 +54,43 @@ bool TcpServer::Start(const char *port)
 		return -1;
 	}
 
-	if (listen(*server, 0) == SOCKET_ERROR) { //Если не удалось получить запрос
+	if (listen(*server, 0) == SOCKET_ERROR) { 
 		cout << "Listen function failed with error:" << WSAGetLastError() << endl;
 		return -1;
 	}
-	cout << "Listening for incoming connections...." << endl;
-	char buffer[1024]; //Создать буфер для данных
-	int clientAddrSize = sizeof(clientAddr); //Инициализировать адерс клиента
-	if (( accept(*server, (SOCKADDR*)&clientAddr, &clientAddrSize)) != INVALID_SOCKET) {
+	cout << "Listening for incoming connections....\n" << endl;
+	int clientAddrSize = sizeof(clientAddr); 
+	if (( client = accept(*server, (SOCKADDR*)&clientAddr, &clientAddrSize)) != INVALID_SOCKET) {
 		return true;
 	}
 	return false;
+}
+
+void TcpServer::process() {
+	
+	size_t size = 64;
+
+	while (true)
+	{
+		std::string servBuff(size, ' ');
+		if (recv(client, (char*)servBuff.data(), servBuff.size(), 0) == SOCKET_ERROR)
+		{
+			cout << "Cant get msg\n" << WSAGetLastError() << endl;
+			return;
+		}
+		else
+		{
+			cout << "Get msg\n ";
+			for (std::string::iterator it = servBuff.begin(); 
+				it != servBuff.end(); ++it)
+				cout << *it;
+		}
+		cout << "\n ";
+			char sendbuf[] = "from server hello client.";
+		if (send(client, sendbuf, sizeof(sendbuf
+			), 0) == SOCKET_ERROR)
+		{
+			cout << "Cant get msg\n";
+		}
+	}
 }
