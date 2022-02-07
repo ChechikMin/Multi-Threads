@@ -9,8 +9,6 @@ int main()
 	TcpServer server;
 	if (server.start("8000"))
 		server.process();
-
-    std::cout << "Hello World!\n";
 }
 
 // Запуск программы: CTRL+F5 или меню "Отладка" > "Запуск без отладки"

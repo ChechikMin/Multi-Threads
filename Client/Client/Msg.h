@@ -24,7 +24,7 @@ public:
 
 protected:
 	std::string str;
-	std::vector<int> data;
+	std::vector<long long> data;
 
 };
 
@@ -44,6 +44,7 @@ bool Msg::is_digits()
 {
 	std::string s = str;
 	removeCharsFromString(s, " ");
+	removeCharsFromString(s, "-");
 	return all_of(s.begin(), s.end(), ::isdigit);
 	
 }
@@ -54,19 +55,18 @@ bool Msg::check_size() {
 void Msg::display() { std::cout << this->str; }
 void Msg::fromStringToDigits() {
 	data.clear();
-	std::regex r("\d");
+
 	std::string tmp = str;
-	
-	while (!tmp.empty())
+	std::regex r(R"([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)");
+	for (std::sregex_iterator i = std::sregex_iterator(tmp.begin(), tmp.end(), r);
+		i != std::sregex_iterator();
+		++i)
 	{
-		std::smatch m;
-		std::regex_search(tmp, m, r);
-		
-		for (auto v : m) data.push_back(std::atoi(v.str().c_str()));
-		
-		tmp.erase(tmp.begin());
-		while (!std::isdigit(tmp[0]) && !tmp.empty())
-			tmp.erase(tmp.begin());
+		std::smatch m = *i;
+		if (m.str().size() >= 10)
+			std::cout << "Too large number."<< m.str() <<"Skiped\n";
+		else
+			data.push_back(std::stoi(m.str()));
 	}
 }
 
@@ -99,7 +99,7 @@ private:
 };
 
 int GettenMsg::fromStringToDigits() {
-	std::regex r("[0-9]*");
+	std::regex r("[^a-z^\s]*");
 	std::string tmp = str;
 	std::smatch m;
 	

@@ -1,6 +1,7 @@
 #pragma once
 #include"../../Client/Client/ISocketProvider.h"
 #include <vector>
+#include <chrono>
 #define BUFF_SIZE 64
 using namespace std;
 class TcpServer
@@ -61,6 +62,7 @@ bool TcpServer::start(const char *port)
 	cout << "Listening for incoming connections....\n" << endl;
 	int clientAddrSize = sizeof(clientAddr); 
 	if (( client = accept(*server, (SOCKADDR*)&clientAddr, &clientAddrSize)) != INVALID_SOCKET) {
+		cout << "Client connected\n" << endl;
 		return true;
 	}
 	return false;
@@ -76,17 +78,24 @@ void TcpServer::process() {
 		if (recv(client, (char*)servBuff.data(), servBuff.size(), 0) == SOCKET_ERROR)
 		{
 			cout << "Cant get msg\n" << WSAGetLastError() << endl;
-			return;
+			Sleep(2000);
+			int clientAddrSize = sizeof(clientAddr);
+			client = accept(*server, (SOCKADDR*)&clientAddr, &clientAddrSize);
 		}
 		else
 		{
 			cout << "Get msg\n ";
-			for (std::string::iterator it = servBuff.begin(); 
-				it != servBuff.end(); ++it)
-				cout << *it;
+			int recSum = std::atoi(servBuff.c_str());
+			if (recSum % 32 == 0 && recSum > 9) {
+				for (std::string::iterator it = servBuff.begin();
+					it != servBuff.end(); ++it)
+					cout << *it;
+			}
+			else
+			cout << "Error!\n ";
 		}
 		cout << "\n ";
-			char sendbuf[] = "from server hello client.";
+			char sendbuf[] = "from server:ok!";
 		if (send(client, sendbuf, sizeof(sendbuf
 			), 0) == SOCKET_ERROR)
 		{
